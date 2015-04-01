@@ -1,0 +1,40 @@
+language: rust
+
+env:
+  global:
+    - secure: VC9HPY8DBQjMe4ssbvx+mCNV4pJni623m1I0s9mMWOgw0nIBuetH+xQbcWFLVkJh1R4qgHGCFkvUdiHvrIKwtMBwAN4LD6HBRipHOk+t/8VgacLd5iUo6Bk3MXvMY8kDcZALITT7ikeUqxMRKzbIj2h1mNvWZULHvDPe8AjxEHQ=
+
+before_install:
+  - sudo apt-get update
+
+install:
+  - sudo apt-get install valgrind
+  - git clone --depth 1 https://github.com/japaric/cfail.rs
+
+script:
+  - cargo build --verbose
+  - cargo test --verbose
+  - valgrind target/debug/rc-* 2>&1 | tee debug
+  - cargo bench -- --test
+  - valgrind target/release/rc-* --test 2>&1 | tee release
+  - cargo doc --verbose
+  - cd cfail.rs && cargo build --release && cd ..
+  - CFAIL_LIBRARY_PATH=target/debug:target/debug/deps cfail.rs/target/release/cfail tests/cfail/*.rs
+  - rm -rf cfail.rs
+  - if [[ $(grep lost debug | grep '0 bytes in 0 blocks' | wc -l) != 3 ]]; then
+      exit 1;
+    fi
+  - if [[ $(grep lost release | grep '0 bytes in 0 blocks' | wc -l) != 3 ]]; then
+      exit 1;
+    fi
+  - ./check-line-length.sh
+
+after_success:
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && bash upload-docs.sh'
+
+branches:
+  only: master
+
+notifications:
+  email:
+    on_success: never
