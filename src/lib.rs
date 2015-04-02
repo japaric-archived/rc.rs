@@ -5,7 +5,6 @@
 #![deny(warnings)]
 #![feature(alloc)]
 #![feature(collections)]
-#![feature(convert)]
 #![feature(core)]
 #![feature(custom_attribute)]
 #![feature(filling_drop)]
