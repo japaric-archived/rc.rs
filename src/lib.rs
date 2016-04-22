@@ -3,14 +3,8 @@
 #![cfg_attr(test, plugin(quickcheck_macros))]
 #![deny(missing_docs)]
 #![deny(warnings)]
-#![feature(alloc)]
-#![feature(collections)]
-#![feature(core)]
-#![feature(custom_attribute)]
-#![feature(filling_drop)]
-#![feature(optin_builtin_traits)]
-#![feature(plugin)]
-#![feature(unsafe_no_drop_flag)]
+#![feature(alloc, nonzero, custom_attribute, filling_drop)]
+#![feature(optin_builtin_traits, plugin, unsafe_no_drop_flag)]
 
 #[cfg(test)] extern crate quickcheck;
 #[cfg(test)] extern crate rand;
@@ -20,7 +14,7 @@ extern crate core;
 
 use core::nonzero::NonZero;
 use std::borrow::Borrow;
-use std::boxed;
+use alloc::boxed;
 use std::cell::Cell;
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -146,9 +140,9 @@ impl<'a, T> From<&'a [T]> for Rc<[T]> where T: Clone {
 }
 
 impl<'a> From<&'a str> for Rc<str> {
-    /// NOTE: This requires allocating the `string` first (`String::from_str`).
+    /// NOTE: This requires allocating the `string` first (`String::from`).
     fn from(string: &str) -> Rc<str> {
-        Rc::from(String::from_str(string))
+        Rc::from(String::from(string))
     }
 }
 
@@ -158,8 +152,8 @@ impl<T: ?Sized> From<Box<T>> for Rc<T> {
     fn from(boxed_value: Box<T>) -> Rc<T> {
         unsafe {
             Rc {
-                count: NonZero::new(boxed::into_raw(Box::new(Cell::new(1)))),
-                data: NonZero::new(boxed::into_raw(boxed_value)),
+                count: NonZero::new(boxed::Box::into_raw(Box::new(Cell::new(1)))),
+                data: NonZero::new(boxed::Box::into_raw(boxed_value)),
             }
         }
     }
