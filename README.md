@@ -1,3 +1,16 @@
+# Status
+
+This project is **UNMAINTAINED**. If you would like to become a maintainer, open an issue.
+
+I was only using this crate with [lisp.rs], but that project is inactive right now so this crate is
+now unmaintained.
+
+[lisp.rs]: https://github.com/japaric/lisp.rs
+
+-- @japaric, 2016-05-02
+
+---
+
 [![Build Status][status]](https://travis-ci.org/japaric/rc.rs)
 
 # `rc.rs`
